@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Feedback — Hospital</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:      #0d6e6e;
+    --teal-lt:   #e6f4f4;
+    --teal-mid:  #1a8f8f;
+    --red:       #c0392b;
+    --gold:      #b8860b;
+    --bg:        #f5f7f6;
+    --card:      #ffffff;
+    --text:      #1c2b2b;
+    --muted:     #6b8080;
+    --border:    #ccdada;
+    --radius:    12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--teal) 0%, #0a4f4f 100%);
+    padding: 28px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 60%);
+  }
+  .header-cross {
+    font-size: 28px;
+    margin-bottom: 6px;
+    opacity: 0.9;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .header p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.72);
+    margin-top: 4px;
+    font-weight: 300;
+    letter-spacing: 0.3px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    max-width: 580px;
+    margin: -16px auto 0;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 24px rgba(0,80,80,0.10);
+    padding: 28px 24px 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid var(--teal-lt);
+  }
+
+  /* Type toggle */
+  .type-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .type-btn {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 10px;
+    cursor: pointer;
+    background: #fff;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+    outline: none;
+  }
+  .type-btn .icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+  .type-btn .label { font-size: 0.82rem; font-weight: 500; color: var(--muted); }
+  .type-btn.active.complaint { border-color: var(--red); background: #fff5f5; }
+  .type-btn.active.complaint .label { color: var(--red); }
+  .type-btn.active.request  { border-color: var(--teal); background: var(--teal-lt); }
+  .type-btn.active.request  .label { color: var(--teal); }
+  .type-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.07); }
+
+  /* Form fields */
+  .form-group { margin-bottom: 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.2px;
+  }
+  label span.req { color: var(--red); margin-left: 2px; }
+  input, select, textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(13,110,110,0.10);
+  }
+  textarea { resize: vertical; min-height: 100px; }
+  select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+  /* Priority */
+  .priority-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .priority-chip {
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    background: #fff;
+    transition: all 0.18s;
+    outline: none;
+  }
+  .priority-chip.active[data-p="Low"]    { border-color: #27ae60; color: #27ae60; background: #eefaf3; }
+  .priority-chip.active[data-p="Medium"] { border-color: var(--gold); color: var(--gold); background: #fdf9ec; }
+  .priority-chip.active[data-p="High"]   { border-color: var(--red); color: var(--red); background: #fff5f5; }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-mid) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 8px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,110,110,0.30); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* Success */
+  .success-box {
+    display: none;
+    text-align: center;
+    padding: 32px 16px;
+  }
+  .success-box .check {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--teal-lt);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 16px;
+  }
+  .success-box h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--teal); }
+  .success-box p { color: var(--muted); font-size: 0.88rem; margin-top: 8px; }
+  .ticket-id { font-size: 1.1rem; font-weight: 500; color: var(--teal); background: var(--teal-lt); padding: 8px 20px; border-radius: 20px; display: inline-block; margin: 14px 0; }
+  .new-btn { background: none; border: 2px solid var(--teal); color: var(--teal); border-radius: 8px; padding: 10px 24px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+  .new-btn:hover { background: var(--teal); color: #fff; }
+
+  /* Spinner */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Note */
+  .note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 16px; }
+
+  @media (max-width: 440px) {
+    .form-row { grid-template-columns: 1fr; }
+    .card { margin: -12px 10px 0; padding: 22px 16px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-cross">✚</div>
+  <h1>Patient Feedback Portal</h1>
+  <p>Your voice helps us serve better — all submissions are reviewed by management</p>
+</div>
+
+<div class="card" id="formCard">
+
+  <!-- Type -->
+  <div class="section-label">What would you like to submit?</div>
+  <div class="type-row">
+    <button class="type-btn complaint active" onclick="setType('Complaint')" id="btnComplaint">
+      <span class="icon">⚠️</span>
+      <span class="label">Complaint</span>
+    </button>
+    <button class="type-btn request" onclick="setType('Request')" id="btnRequest">
+      <span class="icon">🙏</span>
+      <span class="label">Request</span>
+    </button>
+  </div>
+
+  <!-- Patient info -->
+  <div class="section-label" style="margin-top:4px;">Patient / Attender Details</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Name <span class="req">*</span></label>
+      <input type="text" id="name" placeholder="Your full name">
+    </div>
+    <div class="form-group">
+      <label>Mobile Number <span class="req">*</span></label>
+      <input type="tel" id="mobile" placeholder="10-digit number" maxlength="10">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Patient / OP Number</label>
+      <input type="text" id="patientId" placeholder="e.g. OP-2024-001">
+    </div>
+    <div class="form-group">
+      <label>Ward / Department</label>
+      <select id="dept">
+        <option value="">-- Select --</option>
+        <option>Outpatient (OPD)</option>
+        <option>Inpatient Ward</option>
+        <option>Emergency / Casualty</option>
+        <option>Lab / Diagnostics</option>
+        <option>Pharmacy</option>
+        <option>Surgery / OT</option>
+        <option>Billing / Admin</option>
+        <option>Nursing Station</option>
+        <option>Canteen / Housekeeping</option>
+        <option>Other</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="section-label">Feedback Details</div>
+  <div class="form-group">
+    <label>Category <span class="req">*</span></label>
+    <select id="category">
+      <option value="">-- Select category --</option>
+      <optgroup label="Complaints">
+        <option>Staff Behaviour</option>
+        <option>Doctor / Treatment Concern</option>
+        <option>Waiting Time</option>
+        <option>Cleanliness / Hygiene</option>
+        <option>Billing / Charges</option>
+        <option>Facilities / Infrastructure</option>
+        <option>Medicine / Pharmacy Issue</option>
+        <option>Food Quality</option>
+      </optgroup>
+      <optgroup label="Requests">
+        <option>Extra Bed / Accommodation</option>
+        <option>Appointment Rescheduling</option>
+        <option>Medical Records / Certificate</option>
+        <option>Wheelchair / Assistance</option>
+        <option>Diet / Special Meal</option>
+        <option>Information / Guidance</option>
+        <option>Other Request</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Description <span class="req">*</span></label>
+    <textarea id="description" placeholder="Please describe your complaint or request in detail…"></textarea>
+  </div>
+
+  <!-- Priority -->
+  <div class="form-group">
+    <label>Priority</label>
+    <div class="priority-row">
+      <button class="priority-chip active" data-p="Low" onclick="setPriority(this)">🟢 Low</button>
+      <button class="priority-chip" data-p="Medium" onclick="setPriority(this)">🟡 Medium</button>
+      <button class="priority-chip" data-p="High" onclick="setPriority(this)">🔴 High / Urgent</button>
+    </div>
+  </div>
+
+  <button class="submit-btn" onclick="submitForm()" id="submitBtn">Submit Feedback</button>
+  <p class="note">🔒 Your feedback is confidential and reviewed by hospital management only.</p>
+</div>
+
+<!-- Success -->
+<div class="card success-box" id="successCard">
+  <div class="check">✅</div>
+  <h2>Thank You!</h2>
+  <p>Your feedback has been recorded successfully.</p>
+  <div class="ticket-id" id="ticketDisplay"></div>
+  <p style="font-size:0.82rem; color:var(--muted);">Please note your Ticket ID for follow-up enquiries.</p>
+  <br>
+  <button class="new-btn" onclick="resetForm()">Submit Another</button>
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────
+  // Replace this with your deployed Apps Script Web App URL
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwn9JUpGSBW31nD7_EOSX2QBbEBK4NdxRgKE_K1GsShimOdtS0w_gxXurv05DknrpAqqQ/exec";
+  // ────────────────────────────────────────────────────────
+
+  let currentType = "Complaint";
+  let currentPriority = "Low";
+
+  function setType(type) {
+    currentType = type;
+    document.getElementById("btnComplaint").classList.toggle("active", type === "Complaint");
+    document.getElementById("btnRequest").classList.toggle("active", type === "Request");
+  }
+
+  function setPriority(el) {
+    document.querySelectorAll(".priority-chip").forEach(c => c.classList.remove("active"));
+    el.classList.add("active");
+    currentPriority = el.dataset.p;
+  }
+
+  function generateTicket() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    return `TKT-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${Math.floor(1000+Math.random()*9000)}`;
+  }
+
+  async function submitForm() {
+    const name        = document.getElementById("name").value.trim();
+    const mobile      = document.getElementById("mobile").value.trim();
+    const category    = document.getElementById("category").value;
+    const description = document.getElementById("description").value.trim();
+
+    if (!name)        return alert("Please enter your name.");
+    if (!/^\d{10}$/.test(mobile)) return alert("Please enter a valid 10-digit mobile number.");
+    if (!category)    return alert("Please select a category.");
+    if (!description) return alert("Please describe your feedback.");
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Submitting…';
+
+    const ticketId = generateTicket();
+    const payload = {
+      ticketId,
+      type:      currentType,
+      name,
+      mobile,
+      patientId: document.getElementById("patientId").value.trim() || "-",
+      dept:      document.getElementById("dept").value || "-",
+      category,
+      description,
+      priority:  currentPriority,
+      date:      new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      status:    "Open"
+    };
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      // no-cors mode — treat as success if no network error
+    }
+
+    document.getElementById("formCard").style.display = "none";
+    document.getElementById("ticketDisplay").textContent = ticketId;
+    document.getElementById("successCard").style.display = "block";
+
+    btn.disabled = false;
+    btn.innerHTML = "Submit Feedback";
+  }
+
+  function resetForm() {
+    document.getElementById("name").value = "";
+    document.getElementById("mobile").value = "";
+    document.getElementById("patientId").value = "";
+    document.getElementById("dept").value = "";
+    document.getElementById("category").value = "";
+    document.getElementById("description").value = "";
+    setType("Complaint");
+    document.querySelectorAll(".priority-chip").forEach((c,i) => c.classList.toggle("active", i===0));
+    currentPriority = "Low";
+    document.getElementById("successCard").style.display = "none";
+    document.getElementById("formCard").style.display = "block";
+  }
+</script>
+</body>
+</html>
