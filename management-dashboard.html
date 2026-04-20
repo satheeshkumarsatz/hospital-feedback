@@ -24,408 +24,700 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  /* Top bar */
+  /* ── PIN SCREEN ─────────────────────────────────────────── */
+  #pinScreen {
+    position: fixed; inset: 0; background: linear-gradient(135deg, #062f2f 0%, #0d6e6e 100%);
+    display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;
+  }
+  .pin-card {
+    background: #fff; border-radius: 20px; padding: 40px 32px; width: 100%; max-width: 360px;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .pin-cross { font-size: 2.8rem; margin-bottom: 8px; }
+  .pin-card h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--teal); margin-bottom: 4px; }
+  .pin-card p  { font-size: 0.82rem; color: var(--muted); margin-bottom: 28px; }
+  .pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 28px; }
+  .pin-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--border); background: #fff; transition: all 0.2s;
+  }
+  .pin-dot.filled { background: var(--teal); border-color: var(--teal); transform: scale(1.15); }
+  .pin-dot.error  { background: var(--red);  border-color: var(--red); }
+  .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .pin-key {
+    background: #f5f7f6; border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 16px 8px; font-size: 1.2rem; font-weight: 600; color: var(--text);
+    cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; user-select: none;
+  }
+  .pin-key:hover  { background: var(--teal-lt); border-color: var(--teal); color: var(--teal); }
+  .pin-key:active { transform: scale(0.94); }
+  .pin-key.del    { font-size: 1rem; color: var(--muted); }
+  .pin-error { color: var(--red); font-size: 0.8rem; min-height: 18px; margin-top: 4px; }
+  .pin-hint  { font-size: 0.72rem; color: var(--muted); margin-top: 12px; }
+
+  /* ── MAIN APP ────────────────────────────────────────────── */
+  #app { display: none; }
+
   .topbar {
     background: linear-gradient(135deg, #0a4040 0%, var(--teal) 100%);
-    padding: 16px 24px;
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
   }
-  .topbar-left { display: flex; align-items: center; gap: 12px; }
-  .topbar h1 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.2rem; }
-  .topbar p { color: rgba(255,255,255,0.65); font-size: 0.78rem; margin-top: 1px; }
-  .refresh-btn {
+  .topbar h1 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.15rem; }
+  .topbar p  { color: rgba(255,255,255,0.65); font-size: 0.75rem; margin-top: 1px; }
+  .tbtn {
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-    color: #fff; border-radius: 8px; padding: 8px 16px; font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem; cursor: pointer; transition: 0.2s;
+    color: #fff; border-radius: 8px; padding: 7px 14px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem; cursor: pointer; transition: 0.2s; white-space: nowrap;
   }
-  .refresh-btn:hover { background: rgba(255,255,255,0.25); }
+  .tbtn:hover { background: rgba(255,255,255,0.25); }
 
-  /* Summary cards */
-  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; padding: 18px 20px 0; max-width: 1200px; margin: 0 auto; }
+  .summary {
+    display: grid; grid-template-columns: repeat(5,1fr); gap: 10px;
+    padding: 16px 20px 0; max-width: 1200px; margin: 0 auto;
+  }
   .stat-card {
-    background: var(--card); border-radius: var(--radius); padding: 16px 14px;
-    box-shadow: 0 2px 10px rgba(0,80,80,0.07); text-align: center; border-top: 3px solid var(--teal);
+    background: var(--card); border-radius: var(--radius); padding: 14px 10px;
+    box-shadow: 0 2px 10px rgba(0,80,80,0.07); text-align: center;
   }
-  .stat-card .num { font-size: 2rem; font-weight: 600; line-height: 1; }
-  .stat-card .lbl { font-size: 0.72rem; color: var(--muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
-  .stat-card.open-s  .num { color: var(--teal); }
-  .stat-card.inprog  .num { color: var(--orange); }
-  .stat-card.closed  .num { color: var(--green); }
-  .stat-card.urgent  .num { color: var(--red); }
-  .stat-card.total   .num { color: var(--text); }
+  .stat-card .num { font-size: 1.8rem; font-weight: 600; line-height: 1; }
+  .stat-card .lbl { font-size: 0.65rem; color: var(--muted); margin-top: 3px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+  .s-total  { border-top: 3px solid #888; }       .s-total  .num { color: var(--text); }
+  .s-open   { border-top: 3px solid var(--teal); } .s-open   .num { color: var(--teal); }
+  .s-prog   { border-top: 3px solid var(--orange); }.s-prog   .num { color: var(--orange); }
+  .s-done   { border-top: 3px solid var(--green); } .s-done   .num { color: var(--green); }
+  .s-urgent { border-top: 3px solid var(--red); }   .s-urgent .num { color: var(--red); }
 
-  /* Controls */
-  .controls { max-width: 1200px; margin: 16px auto 0; padding: 0 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .search-box { flex: 1; min-width: 200px; position: relative; }
+  .controls { max-width: 1200px; margin: 14px auto 0; padding: 0 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 180px; position: relative; }
   .search-box input {
-    width: 100%; padding: 10px 14px 10px 36px; border: 1.5px solid var(--border);
-    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    width: 100%; padding: 9px 12px 9px 34px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
     color: var(--text); background: #fff; outline: none; transition: 0.2s;
   }
   .search-box input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,110,110,0.10); }
-  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; color: var(--muted); pointer-events: none; }
-  select.filter {
-    padding: 10px 32px 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.84rem; color: var(--text); background: #fff;
-    outline: none; cursor: pointer; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b8080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 10px center; transition: 0.2s;
+  .si { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  select.flt {
+    padding: 9px 28px 9px 10px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--text);
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b8080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;
+    outline: none; cursor: pointer; -webkit-appearance: none; transition: 0.2s;
   }
-  select.filter:focus { border-color: var(--teal); }
+  select.flt:focus { border-color: var(--teal); }
 
-  /* Table */
-  .table-wrap { max-width: 1200px; margin: 16px auto 40px; padding: 0 20px; }
-  .table-card { background: var(--card); border-radius: var(--radius); box-shadow: 0 2px 12px rgba(0,80,80,0.07); overflow: hidden; }
-  .table-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .table-header h2 { font-size: 0.88rem; font-weight: 600; color: var(--text); }
-  .record-count { font-size: 0.78rem; color: var(--muted); }
-  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-  thead th { background: #f7fafa; color: var(--muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-  tbody tr { border-bottom: 1px solid #f0f5f5; transition: background 0.15s; }
-  tbody tr:hover { background: #fafefe; }
-  tbody td { padding: 11px 14px; vertical-align: middle; }
+  .table-wrap  { max-width: 1200px; margin: 14px auto 40px; padding: 0 20px; }
+  .table-card  { background: var(--card); border-radius: var(--radius); box-shadow: 0 2px 12px rgba(0,80,80,0.07); overflow: hidden; }
+  .tbl-hdr     { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .tbl-hdr h2  { font-size: 0.85rem; font-weight: 600; }
+  .rec-cnt     { font-size: 0.75rem; color: var(--muted); }
+  table        { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead th     {
+    background: #f7fafa; color: var(--muted); font-size: 0.68rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px; padding: 9px 12px;
+    text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody tr     { border-bottom: 1px solid #f0f5f5; transition: background 0.12s; cursor: pointer; }
+  tbody tr:hover { background: #f0fafa; }
+  tbody td     { padding: 10px 12px; vertical-align: middle; }
   tbody tr:last-child { border-bottom: none; }
 
-  /* Badges */
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 500; white-space: nowrap; }
-  .badge-complaint { background: #fff0ee; color: var(--red); }
-  .badge-request   { background: var(--teal-lt); color: var(--teal); }
-  .badge-open   { background: #e8f5e9; color: #1b7a3e; }
-  .badge-inprog { background: #fff3e0; color: #b36000; }
-  .badge-closed { background: #f3f3f3; color: #555; }
-  .badge-escalate { background: #fdecea; color: var(--red); }
-  .p-low    { color: var(--green); font-weight: 500; }
-  .p-medium { color: var(--gold); font-weight: 500; }
-  .p-high   { color: var(--red); font-weight: 600; }
+  .tkt-link {
+    color: var(--teal); font-weight: 600; text-decoration: underline;
+    text-decoration-color: rgba(13,110,110,0.35); text-underline-offset: 2px;
+    cursor: pointer; white-space: nowrap;
+  }
 
-  /* Status select */
+  .badge       { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; white-space: nowrap; }
+  .b-complaint { background: #fff0ee; color: var(--red); }
+  .b-request   { background: var(--teal-lt); color: var(--teal); }
+  .b-open      { background: #e8f5e9; color: #1b7a3e; }
+  .b-prog      { background: #fff3e0; color: #b36000; }
+  .b-done      { background: #f3f3f3; color: #555; }
+  .b-esc       { background: #fdecea; color: var(--red); }
+  .p-low       { color: var(--green); font-weight: 500; }
+  .p-med       { color: var(--gold); font-weight: 600; }
+  .p-high      { color: var(--red); font-weight: 700; }
+
   .status-sel {
-    padding: 5px 28px 5px 8px; border: 1.5px solid var(--border); border-radius: 6px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text);
-    background: #fff; outline: none; cursor: pointer; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%236b8080' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 7px center; transition: 0.2s; min-width: 120px;
+    padding: 4px 24px 4px 7px; border: 1.5px solid var(--border); border-radius: 6px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.76rem; color: var(--text);
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%236b8080' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 6px center;
+    outline: none; cursor: pointer; -webkit-appearance: none; min-width: 110px;
   }
-  .status-sel:focus { border-color: var(--teal); }
-
-  .note-input {
-    width: 100%; padding: 5px 8px; border: 1.5px solid var(--border); border-radius: 6px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text);
-    background: #fff; outline: none; transition: 0.2s;
-  }
-  .note-input:focus { border-color: var(--teal); }
-
   .save-btn {
     background: var(--teal); color: #fff; border: none; border-radius: 6px;
-    padding: 5px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
-    font-weight: 500; cursor: pointer; white-space: nowrap; transition: 0.2s;
+    padding: 4px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+    font-weight: 500; cursor: pointer; transition: 0.2s;
   }
-  .save-btn:hover { background: #0a5555; }
+  .save-btn:hover    { background: #0a5555; }
   .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* Empty / loading */
-  .empty { text-align: center; padding: 48px 20px; color: var(--muted); }
-  .empty .icon { font-size: 2.5rem; margin-bottom: 10px; }
-  .empty p { font-size: 0.88rem; }
+  .empty { text-align: center; padding: 44px 20px; color: var(--muted); }
+  .empty .ico { font-size: 2.2rem; margin-bottom: 8px; }
 
-  /* Config panel */
-  .config-panel {
-    max-width: 600px; margin: 20px auto 0; padding: 0 20px;
-    background: #fffbea; border: 1.5px solid #f0d070; border-radius: var(--radius);
+  /* Config banner */
+  .cfg-banner { background: #fffbea; border-bottom: 1.5px solid #f0d070; padding: 12px 20px; display: none; }
+  .cfg-banner h3 { font-size: 0.82rem; font-weight: 600; color: #7a5c00; margin-bottom: 8px; }
+  .cfg-row  { display: flex; gap: 8px; }
+  .cfg-input {
+    flex: 1; padding: 8px 11px; border: 1.5px solid #e0c060; border-radius: 7px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; background: #fff; outline: none;
   }
-  .config-inner { padding: 16px 0; }
-  .config-inner h3 { font-size: 0.85rem; font-weight: 600; color: #7a5c00; margin-bottom: 10px; }
-  .config-row { display: flex; gap: 8px; align-items: center; }
-  .config-input {
-    flex: 1; padding: 9px 12px; border: 1.5px solid #e0c060; border-radius: 7px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; background: #fff; outline: none; transition: 0.2s;
-  }
-  .config-input:focus { border-color: var(--gold); }
-  .config-btn {
+  .cfg-btn {
     background: var(--gold); color: #fff; border: none; border-radius: 7px;
-    padding: 9px 16px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
-    font-weight: 500; cursor: pointer; white-space: nowrap; transition: 0.2s;
+    padding: 8px 14px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer;
   }
-  .config-btn:hover { background: #9a7000; }
-  .config-note { font-size: 0.72rem; color: #9a7a00; margin-top: 8px; }
+  .cfg-note { font-size: 0.7rem; color: #9a7a00; margin-top: 6px; }
 
+  /* ── DETAIL DRAWER ───────────────────────────────────────── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    z-index: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 500px;
+    background: #fff; z-index: 600; transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column; box-shadow: -8px 0 40px rgba(0,0,0,0.18);
+  }
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-head {
+    background: linear-gradient(135deg, #0a4040, var(--teal));
+    padding: 18px 20px; display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0;
+  }
+  .drawer-head h3 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.05rem; margin-bottom: 2px; }
+  .drawer-head p  { color: rgba(255,255,255,0.7); font-size: 0.75rem; }
+  .close-btn {
+    background: rgba(255,255,255,0.2); border: none; color: #fff; border-radius: 8px;
+    width: 32px; height: 32px; font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; margin-left: 12px; transition: 0.2s;
+  }
+  .close-btn:hover { background: rgba(255,255,255,0.35); }
+
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .detail-item { background: #f8fbfb; border-radius: 8px; padding: 10px 12px; border-left: 3px solid var(--teal-lt); }
+  .detail-item .dl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+  .detail-item .dv { font-size: 0.85rem; color: var(--text); font-weight: 500; }
+  .detail-full { grid-column: 1 / -1; }
+
+  .drawer-section { margin-bottom: 22px; }
+  .drawer-section h4 { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  .status-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .status-chip {
+    border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 14px;
+    font-size: 0.78rem; font-weight: 500; cursor: pointer; color: var(--muted);
+    background: #fff; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .chip-Open        { border-color: #1b7a3e; color: #1b7a3e; background: #e8f5e9; }
+  .chip-InProgress  { border-color: #b36000; color: #b36000; background: #fff3e0; }
+  .chip-Resolved    { border-color: #555;    color: #555;    background: #f3f3f3; }
+  .chip-Escalated   { border-color: var(--red); color: var(--red); background: #fdecea; }
+
+  .update-status-btn {
+    width: 100%; background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+    color: #fff; border: none; border-radius: 8px; padding: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: 0.2s;
+  }
+  .update-status-btn:hover    { opacity: 0.9; }
+  .update-status-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Work notes */
+  .worknote-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; max-height: 240px; overflow-y: auto; }
+  .wn-item      { background: #f5f9f9; border-radius: 8px; padding: 10px 12px; border-left: 3px solid var(--teal-lt); }
+  .wn-meta      { font-size: 0.68rem; color: var(--muted); margin-bottom: 4px; }
+  .wn-text      { font-size: 0.83rem; color: var(--text); line-height: 1.55; }
+  .wn-empty     { font-size: 0.82rem; color: var(--muted); text-align: center; padding: 16px; background: #f8fbfb; border-radius: 8px; }
+
+  .wn-add-row   { display: flex; flex-direction: column; gap: 8px; }
+  .wn-textarea  {
+    width: 100%; min-height: 80px; resize: vertical; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem; color: var(--text); outline: none; transition: 0.2s;
+  }
+  .wn-textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,110,110,0.10); }
+  .wn-row2   { display: flex; gap: 8px; }
+  .wn-by     { padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--text); outline: none; flex: 1; transition: 0.2s; }
+  .wn-by:focus { border-color: var(--teal); }
+  .add-wn-btn {
+    background: var(--teal); color: #fff; border: none; border-radius: 8px;
+    padding: 8px 16px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; flex-shrink: 0;
+  }
+  .add-wn-btn:hover    { background: #0a5555; }
+  .add-wn-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Toast */
   .toast {
-    position: fixed; bottom: 24px; right: 24px; background: var(--teal); color: #fff;
-    padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+    position: fixed; bottom: 20px; right: 20px; background: var(--teal); color: #fff;
+    padding: 10px 18px; border-radius: 8px; font-size: 0.84rem; font-weight: 500;
     box-shadow: 0 4px 16px rgba(0,0,0,0.2); transform: translateY(80px); opacity: 0;
-    transition: all 0.35s; z-index: 999; pointer-events: none;
+    transition: all 0.32s; z-index: 9000; pointer-events: none;
   }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  @media (max-width: 700px) {
-    .topbar { padding: 12px 14px; }
-    .summary { grid-template-columns: repeat(3,1fr); padding: 14px 14px 0; }
-    .controls, .table-wrap { padding: 0 12px; }
-    thead { display: none; }
-    tbody tr { display: block; border-bottom: 3px solid var(--border); padding: 10px 0; }
-    tbody td { display: block; padding: 4px 12px; border-bottom: none; }
-    tbody td::before { content: attr(data-label) ": "; font-weight: 600; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: sp 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  @media (max-width: 680px) {
+    .summary { grid-template-columns: repeat(3,1fr); }
+    thead    { display: none; }
+    tbody tr { display: block; border-bottom: 3px solid var(--border); padding: 8px 0; }
+    tbody td { display: flex; padding: 4px 12px; font-size: 0.8rem; }
+    tbody td::before { content: attr(data-label); font-weight: 600; color: var(--muted); font-size: 0.68rem; text-transform: uppercase; min-width: 90px; flex-shrink: 0; padding-top: 1px; }
+    .drawer  { max-width: 100%; }
+    .detail-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<!-- Config panel (shown until URL is set) -->
-<div class="config-panel" id="configPanel" style="display:none;">
-  <div class="config-inner">
-    <h3>⚙️ Setup: Enter your Apps Script Web App URL</h3>
-    <div class="config-row">
-      <input class="config-input" id="urlInput" placeholder="https://script.google.com/macros/s/…/exec" type="url">
-      <button class="config-btn" onclick="saveUrl()">Save</button>
+<!-- ═══ PIN SCREEN ══════════════════════════════════════════ -->
+<div id="pinScreen">
+  <div class="pin-card">
+    <div class="pin-cross">✚</div>
+    <h2>Management Access</h2>
+    <p>Enter your 4-digit PIN to access the dashboard</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
     </div>
-    <p class="config-note">This URL is stored locally in your browser. You only need to set this once per device.</p>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" onclick="pinKey('0')" style="grid-column:2">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <p class="pin-hint">🔒 Authorised hospital personnel only</p>
   </div>
 </div>
 
-<!-- Top bar -->
-<div class="topbar">
-  <div class="topbar-left">
+<!-- ═══ MAIN APP ════════════════════════════════════════════ -->
+<div id="app">
+
+  <div class="cfg-banner" id="cfgBanner">
+    <h3>⚙️ Setup — Enter your Google Apps Script Web App URL</h3>
+    <div class="cfg-row">
+      <input class="cfg-input" id="urlInput" placeholder="https://script.google.com/macros/s/…/exec" type="url">
+      <button class="cfg-btn" onclick="saveUrl()">Save</button>
+    </div>
+    <p class="cfg-note">Stored in your browser. Only needs to be set once per device.</p>
+  </div>
+
+  <div class="topbar">
     <div>
       <h1>✚ Feedback Dashboard</h1>
-      <p>Hospital Management — Patient Feedback Tracker</p>
+      <p>Hospital Management · Patient Feedback Tracker</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="tbtn" onclick="loadData()">🔄 Refresh</button>
+      <button class="tbtn" onclick="document.getElementById('cfgBanner').style.display='block'">⚙️ Setup</button>
+      <button class="tbtn" onclick="lockDashboard()">🔒 Lock</button>
     </div>
   </div>
-  <div style="display:flex; gap:8px; align-items:center;">
-    <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
-    <button class="refresh-btn" onclick="document.getElementById('configPanel').style.display='block'" title="Settings">⚙️</button>
-  </div>
-</div>
 
-<!-- Summary cards -->
-<div class="summary">
-  <div class="stat-card total">
-    <div class="num" id="cnt-total">—</div>
-    <div class="lbl">Total</div>
+  <div class="summary">
+    <div class="stat-card s-total" ><div class="num" id="c-total">—</div><div class="lbl">Total</div></div>
+    <div class="stat-card s-open"  ><div class="num" id="c-open" >—</div><div class="lbl">Open</div></div>
+    <div class="stat-card s-prog"  ><div class="num" id="c-prog" >—</div><div class="lbl">In Progress</div></div>
+    <div class="stat-card s-done"  ><div class="num" id="c-done" >—</div><div class="lbl">Resolved</div></div>
+    <div class="stat-card s-urgent"><div class="num" id="c-urg"  >—</div><div class="lbl">Urgent</div></div>
   </div>
-  <div class="stat-card open-s">
-    <div class="num" id="cnt-open">—</div>
-    <div class="lbl">Open</div>
-  </div>
-  <div class="stat-card inprog">
-    <div class="num" id="cnt-inprog">—</div>
-    <div class="lbl">In Progress</div>
-  </div>
-  <div class="stat-card closed">
-    <div class="num" id="cnt-closed">—</div>
-    <div class="lbl">Resolved</div>
-  </div>
-  <div class="stat-card urgent">
-    <div class="num" id="cnt-urgent">—</div>
-    <div class="lbl">Urgent</div>
-  </div>
-</div>
 
-<!-- Controls -->
-<div class="controls" style="margin-top:16px;">
-  <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search by name, ticket, category…" oninput="renderTable()">
-  </div>
-  <select class="filter" id="filterType" onchange="renderTable()">
-    <option value="">All Types</option>
-    <option>Complaint</option>
-    <option>Request</option>
-  </select>
-  <select class="filter" id="filterStatus" onchange="renderTable()">
-    <option value="">All Statuses</option>
-    <option>Open</option>
-    <option>In Progress</option>
-    <option>Resolved</option>
-    <option>Escalated</option>
-  </select>
-  <select class="filter" id="filterPriority" onchange="renderTable()">
-    <option value="">All Priority</option>
-    <option>High</option>
-    <option>Medium</option>
-    <option>Low</option>
-  </select>
-</div>
-
-<!-- Table -->
-<div class="table-wrap">
-  <div class="table-card">
-    <div class="table-header">
-      <h2>Feedback Records</h2>
-      <span class="record-count" id="recordCount"></span>
+  <div class="controls">
+    <div class="search-box">
+      <span class="si">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search ticket, name, category…" oninput="renderTable()">
     </div>
-    <div id="tableBody">
-      <div class="empty">
-        <div class="icon">📋</div>
-        <p>Loading feedback records…</p>
+    <select class="flt" id="fType"     onchange="renderTable()"><option value="">All Types</option><option>Complaint</option><option>Request</option></select>
+    <select class="flt" id="fStatus"   onchange="renderTable()"><option value="">All Status</option><option>Open</option><option>In Progress</option><option>Resolved</option><option>Escalated</option></select>
+    <select class="flt" id="fPriority" onchange="renderTable()"><option value="">All Priority</option><option>High</option><option>Medium</option><option>Low</option></select>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-card">
+      <div class="tbl-hdr">
+        <h2>Feedback Records <span style="font-size:0.75rem;color:var(--muted);font-weight:400;">— click any ticket to view full details &amp; work notes</span></h2>
+        <span class="rec-cnt" id="recCnt"></span>
       </div>
+      <div id="tableBody"><div class="empty"><div class="ico">📋</div><p>Loading…</p></div></div>
     </div>
   </div>
+</div>
+
+<!-- ═══ DETAIL DRAWER ═══════════════════════════════════════ -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer"  id="drawer">
+  <div class="drawer-head">
+    <div>
+      <h3 id="dw-ticket">Ticket Details</h3>
+      <p  id="dw-date"></p>
+    </div>
+    <button class="close-btn" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── CONFIG ───────────────────────────────────────────────
-  let APPS_SCRIPT_URL = localStorage.getItem("hospital_fb_url") || "";
-  // ─────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  ★  CHANGE YOUR PIN HERE  ★
+const CORRECT_PIN = "1234";
+// ══════════════════════════════════════════════════════
 
-  let allData = [];
+let APPS_SCRIPT_URL  = localStorage.getItem("hosp_fb_url") || "";
+let allData          = [];
+let currentTicket    = null;
+let drawerStatus     = "";
 
-  function saveUrl() {
-    const v = document.getElementById("urlInput").value.trim();
-    if (!v.startsWith("https://script.google.com")) return alert("Please enter a valid Apps Script URL.");
-    APPS_SCRIPT_URL = v;
-    localStorage.setItem("hospital_fb_url", v);
-    document.getElementById("configPanel").style.display = "none";
-    showToast("URL saved! Loading data…");
-    loadData();
+// ── PIN ───────────────────────────────────────────────
+let pinEntry = "";
+function pinKey(k) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += k;
+  refreshDots();
+  if (pinEntry.length === 4) setTimeout(checkPin, 160);
+}
+function pinDel() {
+  pinEntry = pinEntry.slice(0,-1);
+  refreshDots();
+  document.getElementById("pinError").textContent = "";
+}
+function refreshDots(err=false) {
+  for (let i=0;i<4;i++) {
+    const d = document.getElementById("d"+i);
+    d.classList.toggle("filled", i < pinEntry.length && !err);
+    d.classList.toggle("error",  i < pinEntry.length && err);
   }
-
-  function showToast(msg, ok=true) {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.style.background = ok ? "#0d6e6e" : "#c0392b";
-    t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 3000);
+}
+function checkPin() {
+  if (pinEntry === CORRECT_PIN) {
+    document.getElementById("pinScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    initApp();
+  } else {
+    document.getElementById("pinError").textContent = "Incorrect PIN. Please try again.";
+    refreshDots(true);
+    setTimeout(() => { pinEntry = ""; refreshDots(); }, 800);
   }
+}
+function lockDashboard() {
+  document.getElementById("app").style.display = "none";
+  document.getElementById("pinScreen").style.display = "flex";
+  pinEntry = ""; refreshDots();
+  document.getElementById("pinError").textContent = "";
+}
 
-  async function loadData() {
-    if (!APPS_SCRIPT_URL) { document.getElementById("configPanel").style.display = "block"; return; }
-    document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="icon">⏳</div><p>Loading…</p></div>`;
-    try {
-      const res = await fetch(APPS_SCRIPT_URL + "?action=getAll", { cache: "no-cache" });
-      const json = await res.json();
-      allData = json.data || [];
-      updateSummary();
-      renderTable();
-    } catch (e) {
-      document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>Could not load data. Check the Apps Script URL.</p></div>`;
-    }
-  }
-
-  function updateSummary() {
-    document.getElementById("cnt-total").textContent  = allData.length;
-    document.getElementById("cnt-open").textContent   = allData.filter(r => r.status === "Open").length;
-    document.getElementById("cnt-inprog").textContent = allData.filter(r => r.status === "In Progress").length;
-    document.getElementById("cnt-closed").textContent = allData.filter(r => r.status === "Resolved").length;
-    document.getElementById("cnt-urgent").textContent = allData.filter(r => r.priority === "High").length;
-  }
-
-  function renderTable() {
-    const search   = document.getElementById("searchInput").value.toLowerCase();
-    const fType    = document.getElementById("filterType").value;
-    const fStatus  = document.getElementById("filterStatus").value;
-    const fPriority = document.getElementById("filterPriority").value;
-
-    let rows = allData.filter(r => {
-      if (fType   && r.type     !== fType)    return false;
-      if (fStatus && r.status   !== fStatus)  return false;
-      if (fPriority && r.priority !== fPriority) return false;
-      if (search) {
-        const hay = `${r.ticketId} ${r.name} ${r.mobile} ${r.category} ${r.dept} ${r.description}`.toLowerCase();
-        if (!hay.includes(search)) return false;
-      }
-      return true;
-    }).sort((a,b) => {
-      // Sort: High priority first, then by date desc
-      const pOrder = {High:0,Medium:1,Low:2};
-      if (pOrder[a.priority] !== pOrder[b.priority]) return pOrder[a.priority] - pOrder[b.priority];
-      return new Date(b.date) - new Date(a.date);
-    });
-
-    document.getElementById("recordCount").textContent = `${rows.length} record${rows.length !== 1 ? 's' : ''}`;
-
-    if (!rows.length) {
-      document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="icon">🔍</div><p>No records match your filters.</p></div>`;
-      return;
-    }
-
-    const typeBadge = t => t === "Complaint"
-      ? `<span class="badge badge-complaint">⚠️ Complaint</span>`
-      : `<span class="badge badge-request">🙏 Request</span>`;
-
-    const statusBadge = s => {
-      const map = { "Open":"badge-open","In Progress":"badge-inprog","Resolved":"badge-closed","Escalated":"badge-escalate" };
-      return `<span class="badge ${map[s]||'badge-open'}">${s||'Open'}</span>`;
-    };
-
-    const priClass = p => p === "High" ? "p-high" : p === "Medium" ? "p-medium" : "p-low";
-
-    const html = `<table>
-      <thead>
-        <tr>
-          <th>Ticket</th><th>Date</th><th>Type</th><th>Name / Mobile</th>
-          <th>Dept</th><th>Category</th><th>Description</th><th>Priority</th>
-          <th>Status</th><th>Notes</th><th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map((r,i) => `
-        <tr id="row-${r.ticketId}">
-          <td data-label="Ticket"><strong>${r.ticketId}</strong></td>
-          <td data-label="Date" style="white-space:nowrap;font-size:0.78rem;">${r.date}</td>
-          <td data-label="Type">${typeBadge(r.type)}</td>
-          <td data-label="Patient">
-            <strong style="font-size:0.85rem;">${r.name}</strong><br>
-            <span style="color:var(--muted);font-size:0.75rem;">${r.mobile}</span>
-            ${r.patientId && r.patientId !== '-' ? `<br><span style="color:var(--teal);font-size:0.72rem;">${r.patientId}</span>` : ''}
-          </td>
-          <td data-label="Dept" style="font-size:0.8rem;">${r.dept||'-'}</td>
-          <td data-label="Category" style="font-size:0.8rem;">${r.category}</td>
-          <td data-label="Description" style="max-width:180px;font-size:0.8rem;">${r.description}</td>
-          <td data-label="Priority"><span class="${priClass(r.priority)}">${r.priority}</span></td>
-          <td data-label="Status">${statusBadge(r.status)}</td>
-          <td data-label="Notes"><input class="note-input" id="note-${r.ticketId}" value="${(r.notes||'').replace(/"/g,'&quot;')}" placeholder="Add note…"></td>
-          <td data-label="Action" style="white-space:nowrap;">
-            <select class="status-sel" id="sel-${r.ticketId}">
-              <option ${r.status==='Open'?'selected':''}>Open</option>
-              <option ${r.status==='In Progress'?'selected':''}>In Progress</option>
-              <option ${r.status==='Resolved'?'selected':''}>Resolved</option>
-              <option ${r.status==='Escalated'?'selected':''}>Escalated</option>
-            </select><br>
-            <button class="save-btn" style="margin-top:5px;" onclick="updateRow('${r.ticketId}')">Save</button>
-          </td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
-
-    document.getElementById("tableBody").innerHTML = html;
-  }
-
-  async function updateRow(ticketId) {
-    const btn    = document.querySelector(`#row-${ticketId} .save-btn`);
-    const status = document.getElementById(`sel-${ticketId}`).value;
-    const notes  = document.getElementById(`note-${ticketId}`).value.trim();
-
-    btn.disabled = true; btn.textContent = "…";
-
-    const payload = { action: "update", ticketId, status, notes };
-    try {
-      await fetch(APPS_SCRIPT_URL, {
-        method: "POST", mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      // Update local
-      const r = allData.find(x => x.ticketId === ticketId);
-      if (r) { r.status = status; r.notes = notes; }
-      updateSummary();
-      renderTable();
-      showToast("✅ Updated successfully!");
-    } catch(e) {
-      showToast("⚠️ Update failed. Try again.", false);
-      btn.disabled = false; btn.textContent = "Save";
-    }
-  }
-
-  // Init
+// ── INIT ──────────────────────────────────────────────
+function initApp() {
   if (!APPS_SCRIPT_URL) {
-    document.getElementById("configPanel").style.display = "block";
-    document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="icon">⚙️</div><p>Please enter your Apps Script URL above to get started.</p></div>`;
-    ["cnt-total","cnt-open","cnt-inprog","cnt-closed","cnt-urgent"].forEach(id => document.getElementById(id).textContent = "0");
+    document.getElementById("cfgBanner").style.display = "block";
+    document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="ico">⚙️</div><p>Please enter your Apps Script URL above to begin.</p></div>`;
+    setStats(0,0,0,0,0);
   } else {
     loadData();
   }
+}
+function saveUrl() {
+  const v = document.getElementById("urlInput").value.trim();
+  if (!v.startsWith("https://script.google.com")) return alert("Please enter a valid Apps Script URL.");
+  APPS_SCRIPT_URL = v;
+  localStorage.setItem("hosp_fb_url", v);
+  document.getElementById("cfgBanner").style.display = "none";
+  showToast("URL saved! Loading data…");
+  loadData();
+}
+
+// ── DATA ──────────────────────────────────────────────
+async function loadData() {
+  document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="ico">⏳</div><p>Loading feedback records…</p></div>`;
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL + "?action=getAll", {cache:"no-cache"});
+    const json = await res.json();
+    allData = json.data || [];
+    updateStats();
+    renderTable();
+  } catch(e) {
+    document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="ico">⚠️</div><p>Could not load data. Check the Apps Script URL.</p></div>`;
+  }
+}
+function setStats(t,o,p,d,u) {
+  document.getElementById("c-total").textContent = t;
+  document.getElementById("c-open").textContent  = o;
+  document.getElementById("c-prog").textContent  = p;
+  document.getElementById("c-done").textContent  = d;
+  document.getElementById("c-urg").textContent   = u;
+}
+function updateStats() {
+  setStats(
+    allData.length,
+    allData.filter(r=>r.status==="Open").length,
+    allData.filter(r=>r.status==="In Progress").length,
+    allData.filter(r=>r.status==="Resolved").length,
+    allData.filter(r=>r.priority==="High").length
+  );
+}
+
+// ── TABLE ─────────────────────────────────────────────
+function renderTable() {
+  const q  = document.getElementById("searchInput").value.toLowerCase();
+  const fT = document.getElementById("fType").value;
+  const fS = document.getElementById("fStatus").value;
+  const fP = document.getElementById("fPriority").value;
+
+  let rows = allData.filter(r => {
+    if (fT && r.type     !== fT) return false;
+    if (fS && r.status   !== fS) return false;
+    if (fP && r.priority !== fP) return false;
+    if (q) {
+      const hay = `${r.ticketId} ${r.name} ${r.mobile} ${r.category} ${r.dept} ${r.description}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b)=>{
+    const po={High:0,Medium:1,Low:2};
+    return (po[a.priority]||2)-(po[b.priority]||2);
+  });
+
+  document.getElementById("recCnt").textContent = `${rows.length} record${rows.length!==1?'s':''}`;
+
+  if (!rows.length) {
+    document.getElementById("tableBody").innerHTML = `<div class="empty"><div class="ico">🔍</div><p>No records match your filters.</p></div>`;
+    return;
+  }
+
+  const tBadge = t => t==="Complaint" ? `<span class="badge b-complaint">⚠️ Complaint</span>` : `<span class="badge b-request">🙏 Request</span>`;
+  const sBadge = s => { const m={Open:"b-open","In Progress":"b-prog",Resolved:"b-done",Escalated:"b-esc"}; return `<span class="badge ${m[s]||'b-open'}">${s||'Open'}</span>`; };
+  const pCls   = p => p==="High"?"p-high":p==="Medium"?"p-med":"p-low";
+
+  document.getElementById("tableBody").innerHTML = `<table>
+    <thead><tr>
+      <th>Ticket ID</th><th>Date</th><th>Type</th><th>Name / Mobile</th>
+      <th>Dept</th><th>Category</th><th>Priority</th><th>Status</th><th>Quick Update</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(r=>`
+      <tr onclick="openDrawer('${r.ticketId}')">
+        <td data-label="Ticket"><span class="tkt-link">🔗 ${r.ticketId}</span></td>
+        <td data-label="Date"   style="font-size:0.76rem;white-space:nowrap;">${r.date}</td>
+        <td data-label="Type"  >${tBadge(r.type)}</td>
+        <td data-label="Patient">
+          <strong style="font-size:0.83rem;">${r.name}</strong><br>
+          <span style="color:var(--muted);font-size:0.72rem;">${r.mobile}</span>
+          ${r.patientId&&r.patientId!=='-'?`<br><span style="color:var(--teal);font-size:0.7rem;">${r.patientId}</span>`:''}
+        </td>
+        <td data-label="Dept"    style="font-size:0.78rem;">${r.dept||'-'}</td>
+        <td data-label="Category"style="font-size:0.78rem;">${r.category}</td>
+        <td data-label="Priority"><span class="${pCls(r.priority)}">${r.priority}</span></td>
+        <td data-label="Status" >${sBadge(r.status)}</td>
+        <td data-label="Update"  onclick="event.stopPropagation()">
+          <div style="display:flex;gap:5px;align-items:center;">
+            <select class="status-sel" id="qs-${r.ticketId}">
+              <option ${r.status==='Open'         ?'selected':''}>Open</option>
+              <option ${r.status==='In Progress'  ?'selected':''}>In Progress</option>
+              <option ${r.status==='Resolved'     ?'selected':''}>Resolved</option>
+              <option ${r.status==='Escalated'    ?'selected':''}>Escalated</option>
+            </select>
+            <button class="save-btn" onclick="quickUpdate('${r.ticketId}')">Save</button>
+          </div>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ── QUICK STATUS UPDATE ───────────────────────────────
+async function quickUpdate(ticketId) {
+  const status = document.getElementById(`qs-${ticketId}`).value;
+  const r = allData.find(x=>x.ticketId===ticketId);
+  await pushUpdate(ticketId, status, r?.notes||"", r?.workNotes||"");
+  if (r) r.status = status;
+  updateStats(); renderTable();
+  showToast("✅ Status updated!");
+}
+
+// ── DRAWER ────────────────────────────────────────────
+function openDrawer(ticketId) {
+  currentTicket = allData.find(r=>r.ticketId===ticketId);
+  if (!currentTicket) return;
+  drawerStatus = currentTicket.status || "Open";
+  renderDrawer(currentTicket);
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("drawer").classList.add("open");
+}
+function closeDrawer() {
+  document.getElementById("overlay").classList.remove("open");
+  document.getElementById("drawer").classList.remove("open");
+  currentTicket = null;
+}
+
+function renderDrawer(r) {
+  document.getElementById("dw-ticket").textContent = "🔗 " + r.ticketId;
+  document.getElementById("dw-date").textContent   = "Submitted: " + r.date;
+
+  // Parse work notes (stored as JSON string in sheet)
+  let notes = [];
+  try { notes = r.workNotes ? JSON.parse(r.workNotes) : []; } catch(e) { notes = []; }
+
+  const noteHtml = notes.length
+    ? notes.map(n=>`
+        <div class="wn-item">
+          <div class="wn-meta">📝 <strong>${escHtml(n.by||'Staff')}</strong> &nbsp;·&nbsp; ${escHtml(n.date)}</div>
+          <div class="wn-text">${escHtml(n.text)}</div>
+        </div>`).join('')
+    : `<div class="wn-empty">No work notes yet — add the first note below.</div>`;
+
+  const statuses = ["Open","In Progress","Resolved","Escalated"];
+  const chipKey  = s => "chip-" + s.replace(" ","");
+
+  const tBadge = t => t==="Complaint" ? `<span class="badge b-complaint">⚠️ Complaint</span>` : `<span class="badge b-request">🙏 Request</span>`;
+  const pCls   = p => p==="High"?"p-high":p==="Medium"?"p-med":"p-low";
+  const sBadge = s => { const m={Open:"b-open","In Progress":"b-prog",Resolved:"b-done",Escalated:"b-esc"}; return `<span class="badge ${m[s]||'b-open'}">${s||'Open'}</span>`; };
+
+  document.getElementById("drawerBody").innerHTML = `
+    <div class="drawer-section">
+      <h4>Patient &amp; Complaint Details</h4>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="dl">Name</div><div class="dv">${escHtml(r.name)}</div></div>
+        <div class="detail-item"><div class="dl">Mobile</div><div class="dv">${escHtml(r.mobile)}</div></div>
+        <div class="detail-item"><div class="dl">Patient / OP No.</div><div class="dv">${escHtml(r.patientId||'-')}</div></div>
+        <div class="detail-item"><div class="dl">Department</div><div class="dv">${escHtml(r.dept||'-')}</div></div>
+        <div class="detail-item"><div class="dl">Type</div><div class="dv">${tBadge(r.type)}</div></div>
+        <div class="detail-item"><div class="dl">Category</div><div class="dv">${escHtml(r.category)}</div></div>
+        <div class="detail-item"><div class="dl">Priority</div><div class="dv"><span class="${pCls(r.priority)}">${r.priority}</span></div></div>
+        <div class="detail-item"><div class="dl">Current Status</div><div class="dv" id="dw-cur-status">${sBadge(r.status)}</div></div>
+        <div class="detail-item detail-full">
+          <div class="dl">Description</div>
+          <div class="dv" style="line-height:1.6;margin-top:4px;white-space:pre-wrap;">${escHtml(r.description)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <h4>Update Status</h4>
+      <div class="status-row">
+        ${statuses.map(s=>`
+          <button class="status-chip ${s===drawerStatus?chipKey(s):''}"
+            onclick="selectDrawerStatus('${s}',this)">${s}</button>`).join('')}
+      </div>
+      <button class="update-status-btn" id="updateStatusBtn" onclick="saveDrawerStatus()">
+        ✅ Save Status Change to Google Sheet
+      </button>
+    </div>
+
+    <div class="drawer-section">
+      <h4>Work Notes — all notes are saved permanently to Google Sheet</h4>
+      <div class="worknote-list" id="noteList">${noteHtml}</div>
+      <div class="wn-add-row">
+        <textarea class="wn-textarea" id="wnText" placeholder="Describe the action taken, follow-up required, or any observation…"></textarea>
+        <div class="wn-row2">
+          <input class="wn-by" id="wnBy" placeholder="Your name / role (e.g. Nurse Priya, Dr. Kumar)">
+          <button class="add-wn-btn" id="addWnBtn" onclick="addWorkNote()">➕ Add Note</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function selectDrawerStatus(s, el) {
+  drawerStatus = s;
+  document.querySelectorAll(".status-chip").forEach(c => {
+    c.className = "status-chip";
+  });
+  el.classList.add("chip-" + s.replace(" ",""));
+}
+
+async function saveDrawerStatus() {
+  if (!currentTicket) return;
+  const btn = document.getElementById("updateStatusBtn");
+  btn.disabled = true; btn.innerHTML = `<span class="spin"></span>Saving to Google Sheet…`;
+  await pushUpdate(currentTicket.ticketId, drawerStatus, currentTicket.notes||"", currentTicket.workNotes||"");
+  currentTicket.status = drawerStatus;
+  document.getElementById("dw-cur-status").innerHTML =
+    `<span class="badge ${drawerStatus==='Open'?'b-open':drawerStatus==='In Progress'?'b-prog':drawerStatus==='Resolved'?'b-done':'b-esc'}">${drawerStatus}</span>`;
+  updateStats(); renderTable();
+  btn.disabled = false; btn.innerHTML = "✅ Save Status Change to Google Sheet";
+  showToast("Status updated & saved to Sheet!");
+}
+
+async function addWorkNote() {
+  const text = document.getElementById("wnText").value.trim();
+  const by   = document.getElementById("wnBy").value.trim() || "Staff";
+  if (!text) { alert("Please type a note before adding."); return; }
+  if (!currentTicket) return;
+
+  const btn = document.getElementById("addWnBtn");
+  btn.disabled = true; btn.innerHTML = `<span class="spin"></span>Saving…`;
+
+  let notes = [];
+  try { notes = currentTicket.workNotes ? JSON.parse(currentTicket.workNotes) : []; } catch(e) { notes = []; }
+
+  notes.push({
+    text,
+    by,
+    date: new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})
+  });
+  const workNotesJson = JSON.stringify(notes);
+  currentTicket.workNotes = workNotesJson;
+
+  await pushUpdate(currentTicket.ticketId, currentTicket.status, currentTicket.notes||"", workNotesJson);
+
+  // Refresh notes list
+  const noteHtml = notes.map(n=>`
+    <div class="wn-item">
+      <div class="wn-meta">📝 <strong>${escHtml(n.by)}</strong> &nbsp;·&nbsp; ${escHtml(n.date)}</div>
+      <div class="wn-text">${escHtml(n.text)}</div>
+    </div>`).join('');
+  document.getElementById("noteList").innerHTML = noteHtml;
+
+  // Scroll to bottom of notes
+  const nl = document.getElementById("noteList");
+  nl.scrollTop = nl.scrollHeight;
+
+  document.getElementById("wnText").value = "";
+  btn.disabled = false; btn.innerHTML = "➕ Add Note";
+  showToast("✅ Work note saved to Google Sheet!");
+}
+
+// ── API CALL ──────────────────────────────────────────
+async function pushUpdate(ticketId, status, notes, workNotes) {
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method:"POST", mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({action:"update", ticketId, status, notes, workNotes})
+    });
+  } catch(e) { showToast("⚠️ Network error. Please retry.", false); }
+}
+
+// ── TOAST ─────────────────────────────────────────────
+function showToast(msg, ok=true) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.background = ok ? "#0d6e6e" : "#c0392b";
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 3200);
+}
 </script>
 </body>
 </html>
